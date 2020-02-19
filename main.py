@@ -559,8 +559,10 @@ def adjust_learning_rate(optimizer, epoch):
             param_group["lr"] = state["lr"]
 
 
-# this function is used to evaluate the accuracy on validation set and test set per coverage
 def validation(testloader, model, use_cuda):
+    """
+    Split the test set into a validation set and test set, then calc metrics.
+    """
     model.eval()
     abortion_results = [[], []]
     with torch.no_grad():
