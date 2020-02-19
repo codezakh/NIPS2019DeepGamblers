@@ -54,8 +54,8 @@ parser.add_argument('--coverage', type=float, nargs='+',default=[100.,99.,98.,97
 # Save
 parser.add_argument('-s', '--save', default='saved_checkpoints', type=str, metavar='PATH',
                     help='path to save checkpoint (default: saved_checkpoints)')
-#parser.add_argument('--resume', default='', type=str, metavar='PATH',
-#                    help='path to load the saved model (default: none)')
+parser.add_argument('--resume', default='', type=str, metavar='PATH',
+                   help='path to load the saved model (default: none)')
 # Architecture
 parser.add_argument('--arch', '-a', metavar='ARCH', default='vgg16_bn',
                     choices=model_names,
@@ -69,6 +69,9 @@ parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_false',
 #Device options
 parser.add_argument('--gpu-id', default='0', type=str,
                     help='id(s) for CUDA_VISIBLE_DEVICES')
+
+# Options for fast debugging.
+parser.add_argument('--fastdebug', action='store_true', help="A fast debug option. If this is set, we break after one batch.")
 
 args = parser.parse_args()
 state = {k: v for k, v in args._get_kwargs()}
@@ -196,6 +199,9 @@ def main():
         if os.path.isfile(last_path): os.remove(last_path)
         # append logger file
         logger.append([epoch+1, state['lr'], train_loss, test_loss, 100-train_acc, 100-test_acc])
+        if args.fastdebug:
+            print("\nBreaking early for fast debug.")
+            break
 
     filepath = os.path.join(save_path, "{:d}".format(args.epochs) + ".pth")
     torch.save(model, filepath)
@@ -220,7 +226,7 @@ def train(trainloader, model, criterion, optimizer, epoch, use_cuda):
     top5 = AverageMeter()
     end = time.time()
 
-    bar = Bar('Processing', max=len(trainloader))
+    bar = Bar('Processing Train', max=len(trainloader))
     for batch_idx,  (inputs, targets) in enumerate(trainloader):
         # measure data loading time
         data_time.update(time.time() - end)
@@ -269,6 +275,9 @@ def train(trainloader, model, criterion, optimizer, epoch, use_cuda):
                     top5=top5.avg,
                     )
         bar.next()
+        if args.fastdebug:
+            print("\nBreaking early for fast debug.")
+            break
     bar.finish()
     return (losses.avg, top1.avg)
 
@@ -290,7 +299,7 @@ def test(testloader, model, criterion, epoch, use_cuda, evaluation = False):
     model.eval()
 
     end = time.time()
-    bar = Bar('Processing', max=len(testloader))
+    bar = Bar('Processing Test', max=len(testloader))
     for batch_idx, (inputs, targets) in enumerate(testloader):
         # measure data loading time
         data_time.update(time.time() - end)
@@ -339,6 +348,9 @@ def test(testloader, model, criterion, epoch, use_cuda, evaluation = False):
                     top5=top5.avg,
                     )
         bar.next()
+        if args.fastdebug:
+            print("Breaking early for debugging.")
+            break
     bar.finish()
     if epoch >= args.pretrain:
     	# sort the abstention results according to their reservations, from high to low
@@ -374,6 +386,9 @@ def evaluate(testloader, model, use_cuda):
             predictions = predictions.cpu()
             abortion_results[0].extend(list( reservation.numpy() ))
             abortion_results[1].extend(list( predictions.eq(targets.data).numpy() ))
+            if args.fastdebug:
+                print("Breaking early for debugging.")
+                break
     def shuffle_list(list, seed=10):
         random.seed(seed)
         random.shuffle(list)
