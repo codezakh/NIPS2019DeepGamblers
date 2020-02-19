@@ -493,8 +493,8 @@ def test(testloader, model, criterion, epoch, use_cuda, evaluation=False):
                 # analyze the accuracy at different abstention level
                 abstention_results.extend(
                     zip(
-                        list(reservation.numpy()),
-                        list(predictions.eq(targets.data).numpy()),
+                        list(reservation.cpu().numpy()),
+                        list(predictions.eq(targets.data).cpu().numpy()),
                     )
                 )
                 # calculate loss
