@@ -180,6 +180,8 @@ def main():
         assert os.path.isfile(resume_path), 'no model exists at "{}"'.format(resume_path)
         model = torch.load(args.resume)
         if use_cuda: model = model.cuda()
+        # I don't know what this parameter is for, just hardcoding for now.
+        start_epoch = 1
         test(testloader, model, criterion, start_epoch, use_cuda, evaluation = True)
         return
 
@@ -286,7 +288,7 @@ def test(testloader, model, criterion, epoch, use_cuda, evaluation = False):
 
     # whether to evaluate uncertainty, or confidence
     if evaluation:
-        evaluate(testloader, model, use_cuda)
+        validation(testloader, model, use_cuda)
         return
 
     # switch to test mode
@@ -372,7 +374,7 @@ def adjust_learning_rate(optimizer, epoch):
             param_group['lr'] = state['lr']
             
 # this function is used to evaluate the accuracy on validation set and test set per coverage
-def evaluate(testloader, model, use_cuda):
+def validation(testloader, model, use_cuda):
     model.eval()
     abortion_results = [[],[]]
     with torch.no_grad():
