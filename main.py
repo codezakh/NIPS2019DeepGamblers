@@ -127,8 +127,8 @@ def main():
                 transforms.ToTensor(),
                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
             ])
-        trainset = dataset(root='./data/svhn', train=True, download=True, transform=transform_train)
-        testset = dataset(root='./data/svhn', train=False, download=True, transform=transform_test)
+        trainset = dataset(root='./data/svhn', split='train', download=True, transform=transform_train)
+        testset = dataset(root='./data/svhn', split='test', download=True, transform=transform_test)
     elif args.dataset == 'catsdogs':
         num_classes = 2
         input_size = 64
