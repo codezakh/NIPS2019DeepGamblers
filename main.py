@@ -52,8 +52,8 @@ parser.add_argument('--pretrain', type=int, default=0,
 parser.add_argument('--coverage', type=float, nargs='+',default=[100.,99.,98.,97.,95.,90.,85.,80.,75.,70.,60.,50.,40.,30.,20.,10.],
                     help='the expected coverages used to evaluated the accuracies after abstention')                    
 # Save
-parser.add_argument('-s', '--save', default='save', type=str, metavar='PATH',
-                    help='path to save checkpoint (default: save)')
+parser.add_argument('-s', '--save', default='saved_checkpoints', type=str, metavar='PATH',
+                    help='path to save checkpoint (default: saved_checkpoints)')
 #parser.add_argument('--resume', default='', type=str, metavar='PATH',
 #                    help='path to load the saved model (default: none)')
 # Architecture
