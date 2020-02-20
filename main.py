@@ -700,6 +700,9 @@ if __name__ == "__main__":
         if args.pretrain == 0 and reward < 6.1 and args.dataset == "cifar10":
             args.pretrain = 100
 
+        if args.pretrain == 0 and reward < 6.1 and args.dataset == "svhn":
+            args.pretrain = 50
+
         main()
     if args.evaluate:
         save_data()
