@@ -577,7 +577,8 @@ def validation(testloader, model, use_cuda):
             output, reservation = output[:, :-1], (output[:, -1]).cpu()
             values, predictions = output.data.max(1)
             predictions = predictions.cpu()
-            abortion_results[0].extend(list(reservation.numpy()))
+            #abortion_results[0].extend(list(reservation.numpy()))
+            abortion_results[0].extend(list(1 - values.cpu().numpy()))
             abortion_results[1].extend(list(predictions.eq(targets.data).numpy()))
             if args.fastdebug:
                 print("Breaking early for debugging.")
@@ -698,7 +699,7 @@ if __name__ == "__main__":
 
         # default the pretraining epochs to 100 to reproduce the results in the paper
         if args.pretrain == 0 and reward < 6.1 and args.dataset == "cifar10":
-            args.pretrain = 100
+            args.pretrain = 300 #100
 
         if args.pretrain == 0 and reward < 6.1 and args.dataset == "svhn":
             args.pretrain = 50
