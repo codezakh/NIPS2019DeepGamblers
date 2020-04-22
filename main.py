@@ -14,6 +14,7 @@ import torch.nn.parallel
 import torch.nn.functional as F
 import torch.backends.cudnn as cudnn
 import torch.optim as optim
+from torch.utils.data import Subset
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import models.cifar as models
@@ -563,6 +564,8 @@ def validation(testloader, model, use_cuda):
     """
     Split the test set into a validation set and test set, then calc metrics.
     """
+    test_set_indices = list(range(len(testloader.dataset)))
+    random.shuffle(test_set_indices)
     model.eval()
     abortion_results = [[], []]
     with torch.no_grad():
@@ -574,7 +577,8 @@ def validation(testloader, model, use_cuda):
             output, reservation = output[:, :-1], (output[:, -1]).cpu()
             values, predictions = output.data.max(1)
             predictions = predictions.cpu()
-            abortion_results[0].extend(list(reservation.numpy()))
+            #abortion_results[0].extend(list(reservation.numpy()))
+            abortion_results[0].extend(list(1 - values.cpu().numpy()))
             abortion_results[1].extend(list(predictions.eq(targets.data).numpy()))
             if args.fastdebug:
                 print("Breaking early for debugging.")
@@ -584,8 +588,13 @@ def validation(testloader, model, use_cuda):
         random.seed(seed)
         random.shuffle(list)
 
-    shuffle_list(abortion_results[0])
-    shuffle_list(abortion_results[1])
+    def shuffle_indices(to_shuffle, indices):
+        return [to_shuffle[i] for i in indices]
+
+    # shuffle_list(abortion_results[0])
+    # shuffle_list(abortion_results[1])
+    abortion_results[0] = shuffle_indices(abortion_results[0], test_set_indices)
+    abortion_results[1] = shuffle_indices(abortion_results[1], test_set_indices)
     abortion, correct = (
         torch.tensor(abortion_results[0]),
         torch.tensor(abortion_results[1]),
@@ -690,7 +699,10 @@ if __name__ == "__main__":
 
         # default the pretraining epochs to 100 to reproduce the results in the paper
         if args.pretrain == 0 and reward < 6.1 and args.dataset == "cifar10":
-            args.pretrain = 100
+            args.pretrain = 300 #100
+
+        if args.pretrain == 0 and reward < 6.1 and args.dataset == "svhn":
+            args.pretrain = 50
 
         main()
     if args.evaluate:
